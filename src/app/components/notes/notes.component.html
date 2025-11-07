@@ -1,0 +1,126 @@
+<div class="notes-container">
+  <!-- Notes List Sidebar -->
+  <div class="notes-sidebar">
+    <div class="sidebar-header">
+      <h2>Notes</h2>
+      <button class="btn-primary" (click)="createNewNote()">+ New Note</button>
+    </div>
+    <div class="notes-list">
+      <div 
+        *ngFor="let note of notes" 
+        class="note-item"
+        [class.active]="selectedNote?.id === note.id"
+        (click)="selectNote(note)">
+        <div class="note-item-content">
+          <h3>{{ note.title }}</h3>
+          <p>{{ note.content.substring(0, 50) }}{{ note.content.length > 50 ? '...' : '' }}</p>
+          <small>{{ note.updatedAt | date:'short' }}</small>
+        </div>
+        <button class="btn-delete" (click)="deleteNote(note); $event.stopPropagation()">🗑️</button>
+      </div>
+      <div *ngIf="notes.length === 0" class="empty-state">
+        <p>No notes yet. Create your first note!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-area">
+    <div *ngIf="selectedNote" class="content-wrapper">
+      <!-- Note Editor -->
+      <div class="note-editor">
+        <div class="editor-header">
+          <input 
+            [(ngModel)]="selectedNote.title" 
+            (blur)="saveCurrentNote()"
+            class="note-title-input"
+            placeholder="Note Title">
+          <div class="editor-actions">
+            <button 
+              [class.active]="isListeningNote"
+              (click)="isListeningNote ? stopListeningNote() : startListeningNote()"
+              class="btn-icon"
+              title="Speech to text">
+              {{ isListeningNote ? '🔴' : '🎤' }}
+            </button>
+            <button 
+              (click)="readNoteAloud()"
+              class="btn-icon"
+              title="Read aloud">
+              🔊
+            </button>
+            <button 
+              (click)="stopReading()"
+              class="btn-icon"
+              title="Stop reading">
+              🔇
+            </button>
+          </div>
+        </div>
+        <textarea 
+          [(ngModel)]="selectedNote.content"
+          (blur)="saveCurrentNote()"
+          class="note-content"
+          placeholder="Start typing or use speech-to-text..."></textarea>
+      </div>
+
+      <!-- AI Fixer Panel -->
+      <div class="fixer-panel">
+        <div class="fixer-header">
+          <h3>🤖 AI Text Fixer</h3>
+        </div>
+        
+        <div class="fixer-prompt">
+          <label>Prompt (what to fix):</label>
+          <div class="prompt-input-wrapper">
+            <textarea 
+              [(ngModel)]="fixerPrompt"
+              class="prompt-input"
+              placeholder="E.g., 'Fix grammar and spelling', 'Make it more formal', 'Summarize in 3 sentences'"></textarea>
+            <button 
+              [class.active]="isListeningPrompt"
+              (click)="isListeningPrompt ? stopListeningPrompt() : startListeningPrompt()"
+              class="btn-icon btn-prompt-speech"
+              title="Speech to text for prompt">
+              {{ isListeningPrompt ? '🔴' : '🎤' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="fixer-actions">
+          <button 
+            (click)="fixText()"
+            [disabled]="isProcessing || !fixerPrompt.trim() || !selectedNote.content"
+            class="btn-primary">
+            {{ isProcessing ? 'Processing...' : 'Fix Text' }}
+          </button>
+          <button 
+            (click)="clearFixer()"
+            class="btn-secondary">
+            Clear
+          </button>
+        </div>
+
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <div *ngIf="fixerResult" class="fixer-result">
+          <label>Fixed Text:</label>
+          <div class="result-text">{{ fixerResult }}</div>
+          <div class="result-actions">
+            <button 
+              (click)="applyFixedText()"
+              class="btn-success">
+              Apply to Note
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!selectedNote" class="empty-state-main">
+      <h2>Select a note or create a new one</h2>
+    </div>
+  </div>
+</div>
