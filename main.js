@@ -16,7 +16,7 @@ function createWindow() {
   });
 
   // Load the Angular app
-  const indexPath = path.join(__dirname, 'dist', 'smart-notes', 'browser', 'index.html');
+  const indexPath = path.join(__dirname, 'dist', 'smart-notes', 'index.html');
   
   if (fs.existsSync(indexPath)) {
     mainWindow.loadFile(indexPath);
